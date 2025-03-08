@@ -54,4 +54,35 @@ router.put("/:id/cancel", protect, async (req, res) => {
     }
 });
 
+// Eliminar un libro (solo admin)
+router.delete("/:id", protect, isAdmin, async (req, res) => {
+    try {
+        const book = await Book.findById(req.params.id);
+        if (!book) return res.status(404).json({ msg: "Libro no encontrado" });
+
+        await book.deleteOne();
+        res.json({ msg: "Libro eliminado" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al eliminar el libro" });
+    }
+});
+
+// Editar un libro (solo admin)
+router.put("/:id", protect, isAdmin, async (req, res) => {
+    try {
+        const { title, author, genre } = req.body;
+        const book = await Book.findById(req.params.id);
+        if (!book) return res.status(404).json({ msg: "Libro no encontrado" });
+
+        book.title = title || book.title;
+        book.author = author || book.author;
+        book.genre = genre || book.genre;
+
+        await book.save();
+        res.json(book);
+    } catch (error) {
+        res.status(500).json({ msg: "Error al actualizar el libro" });
+    }
+});
+
 module.exports = router;
