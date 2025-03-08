@@ -40,4 +40,18 @@ router.put("/:id/reserve", protect, async (req, res) => {
     }
 });
 
+// Cancelar una reserva (marcar el libro como disponible)
+router.put("/:id/cancel", protect, async (req, res) => {
+    try {
+        const book = await Book.findById(req.params.id);
+        if (!book) return res.status(404).json({ msg: "Libro no encontrado" });
+
+        book.available = true;
+        await book.save();
+        res.json({ msg: "Reserva cancelada" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al cancelar la reserva" });
+    }
+});
+
 module.exports = router;
