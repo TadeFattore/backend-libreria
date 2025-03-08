@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const {protect} = require("../middleware/authMiddleware");
 
 // Registro de usuario
 router.post("/register", async (req, res) => {
@@ -35,6 +36,18 @@ router.post("/login", async (req, res) => {
         res.json({ token, user: { id: user._id, name: user.name, role: user.role } });
     } catch (error) {
         res.status(500).json({ msg: "Error en el servidor" });
+    }
+});
+
+router.get("/me", protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select("-password");
+        if (!user) {
+            return res.status(404).json({ msg: "Usuario no encontrado" });
+        }
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ msg: "Error al obtener el usuario" });
     }
 });
 

@@ -1,13 +1,17 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
 // Middleware para verificar JWT
-const protect = (req, res, next) => {
-    const token = req.header("Authorization");
-    if (!token) return res.status(401).json({ msg: "Acceso denegado, no hay token" });
-    
+const protect = async (req, res, next) => {
+    let token = req.header("Authorization");
+
+    if (!token) {
+        return res.status(401).json({ msg: "Acceso denegado, no hay token" });
+    }
     try {
-        const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
-        req.user = decoded;
+        token = token.replace("Bearer ", ""); // Remover "Bearer "
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = await User.findById(decoded.id).select("-password");
         next();
     } catch (error) {
         res.status(401).json({ msg: "Token no válido" });
