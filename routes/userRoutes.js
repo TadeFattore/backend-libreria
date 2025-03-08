@@ -61,4 +61,42 @@ router.get("/reservations", protect, async (req, res) => {
     }
 });
 
+// Obtener todos los usuarios (solo admin)
+router.get("/", protect, isAdmin, async (req, res) => {
+    try {
+        const users = await User.find().select("-password");
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ msg: "Error al obtener los usuarios" });
+    }
+});
+
+// Crear un nuevo usuario (solo admin)
+router.post("/", protect, isAdmin, async (req, res) => {
+    const { name, email, password, role } = req.body;
+    try {
+        let user = await User.findOne({ email });
+        if (user) return res.status(400).json({ msg: "El usuario ya existe" });
+
+        user = new User({ name, email, password, role });
+        await user.save();
+        res.status(201).json(user);
+    } catch (error) {
+        res.status(500).json({ msg: "Error al registrar el usuario" });
+    }
+});
+
+// Eliminar un usuario (solo admin)
+router.delete("/:id", protect, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ msg: "Usuario no encontrado" });
+
+        await user.deleteOne();
+        res.json({ msg: "Usuario eliminado" });
+    } catch (error) {
+        res.status(500).json({ msg: "Error al eliminar el usuario" });
+    }
+});
+
 module.exports = router;
