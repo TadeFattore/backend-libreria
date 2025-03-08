@@ -4,7 +4,7 @@ const User = require("../models/User");
 const Book = require("../models/Book");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const {protect} = require("../middleware/authMiddleware");
+const {protect, isAdmin} = require("../middleware/authMiddleware");
 
 // Registro de usuario
 router.post("/register", async (req, res) => {
