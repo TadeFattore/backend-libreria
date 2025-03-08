@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const Book = require("../models/Book");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const {protect} = require("../middleware/authMiddleware");
@@ -48,6 +49,15 @@ router.get("/me", protect, async (req, res) => {
         res.json(user);
     } catch (error) {
         res.status(500).json({ msg: "Error al obtener el usuario" });
+    }
+});
+
+router.get("/reservations", protect, async (req, res) => {
+    try {
+        const reservedBooks = await Book.find({ available: false });
+        res.json(reservedBooks);
+    } catch (error) {
+        res.status(500).json({ msg: "Error al obtener las reservas" });
     }
 });
 
