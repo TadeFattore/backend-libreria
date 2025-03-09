@@ -26,16 +26,34 @@ router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ msg: "Credenciales inválidas" });
 
+        if (!user) {
+            console.log("❌ Usuario no encontrado:", email);
+            return res.status(400).json({ msg: "Credenciales inválidas" });
+        }
+
+        console.log("🔹 Usuario encontrado en MongoDB:", user);
+        console.log("🔹 Contraseña ingresada:", password);
+        console.log("🔹 Contraseña en BD:", user.password);
+
+        // Comprobar si bcrypt.compare() está funcionando bien
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ msg: "Credenciales inválidas" });
+        console.log("🔹 Resultado de bcrypt.compare():", isMatch);
+
+        if (!isMatch) {
+            console.log("❌ Contraseña incorrecta para:", email);
+            return res.status(400).json({ msg: "Credenciales inválidas" });
+        }
+
+        console.log("✅ Usuario autenticado:", email);
 
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
             expiresIn: "1h"
         });
+
         res.json({ token, user: { id: user._id, name: user.name, role: user.role } });
     } catch (error) {
+        console.error("❌ Error en el login:", error);
         res.status(500).json({ msg: "Error en el servidor" });
     }
 });
