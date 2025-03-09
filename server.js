@@ -1,19 +1,24 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const connectDB = require("./config/db");  // 📌 Importamos la conexión
-const userRoutes = require("./routes/userRoutes");
-const bookRoutes = require("./routes/bookRoutes");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 const app = express();
-app.use(express.json());
-app.use(cors());
-
-// Conectar a MongoDB
-connectDB();
-
-app.use("/api/users", userRoutes);
-app.use("/api/books", bookRoutes);
-
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+app.use(cors());
+app.use(express.json());
+
+// Ruta de prueba para comprobar si el backend está funcionando
+app.get("/", (req, res) => {
+    res.send("✅ API en Railway funcionando!");
+});
+
+// Conectar a MongoDB sin opciones obsoletas
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("✅ Conectado a MongoDB"))
+    .catch(err => console.error("❌ Error conectando a MongoDB:", err));
+
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+});
