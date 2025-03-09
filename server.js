@@ -5,6 +5,7 @@ require("dotenv").config();
 
 const bookRoutes = require("./routes/bookRoutes"); // 👈 IMPORTANTE: Asegurate de que el archivo está bien importado
 const userRoutes = require("./routes/userRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use("/api/books", bookRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
 
 // Ruta de prueba para ver si el servidor está corriendo
 app.get("/", (req, res) => {
