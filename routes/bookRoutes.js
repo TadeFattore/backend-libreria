@@ -7,10 +7,26 @@ const { protect, isAdmin } = require("../middleware/authMiddleware");
 // Obtener todos los libros
 router.get("/", async (req, res) => {
     try {
-        const books = await Book.find();
-        res.json(books);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 15;
+        const skip = (page - 1) * limit;
+
+        console.log(`🔹 Página solicitada: ${page}, Límite: ${limit}`);
+
+        const books = await Book.find().skip(skip).limit(limit).lean(); // 👈 IMPORTANTE: Convierte los documentos a objetos JS puros
+
+        const totalBooks = await Book.countDocuments();
+
+        console.log("🔹 Libros enviados al frontend:", books);
+
+        res.json({
+            books: books.map(book => ({ ...book, _id: book._id.toString() })), // 👈 Convertimos _id a string
+            totalPages: Math.ceil(totalBooks / limit),
+            currentPage: page
+        });
     } catch (error) {
-        res.status(500).json({ msg: "Error al obtener los libros" });
+        console.error("❌ Error al obtener los libros:", error);
+        res.status(500).json({ msg: "Error al obtener los libros", books: [] });
     }
 });
 
